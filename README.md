@@ -1,6 +1,9 @@
 # KaggleTaxi
-Workspace for the 'New York City Taxi Trip Duration' Kaggle Challenge
 
-I'm going to use this Kaggle Challenge as an opportunity to learn and practice with the Git Workflow as well as Data Science tools including Pandas and SciKit-Learn. 
+Repository for various Kaggle Challenges which I am using as a way  to learn data science tools and techniques. 
 
+NYC Taxi Duration Challenge:
 Current Best Submission is in the 17th Percentile (598th / 724)
+
+Titanic Data Set Survival Classification: 
+Current Best Submission is in the 35th Percentile (4812nd / 7494)
