@@ -6,4 +6,4 @@ NYC Taxi Duration Challenge:
 Current Best Submission is in the 17th Percentile (598th / 724)
 
 Titanic Data Set Survival Classification: 
-Current Best Submission is in the 35th Percentile (4812nd / 7494)
+Current Best Submission is in the 47th Percentile (3924nd / 7494)
