@@ -2,10 +2,25 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.gaussian_process import GaussianProcessClassifier
+from sklearn.gaussian_process.kernels import RBF
+from sklearn import svm
 import numpy as np
 
-VALIDATE = False
-ALG = "RandomForest"			# Can be KNN, RandomForest
+
+# CONTROLS
+# Change these variables to control the test and validation process.
+
+VALIDATE = False				# True for Validation, False for Testing. 
+NUM_TESTS = 2					# of of iterations of validation process.
+ALG = "Gaussian"				# Can be KNN, RandomForest, MLP, SVC, Gaussian
+
+KNN_PARAMS = dict(n_neighbors=5)
+RANDOMFOREST_PARAMS = dict(max_depth=7, random_state=0, bootstrap=True, criterion='gini')
+MLP_PARAMS = dict(solver='lbfgs', alpha=5e-7, hidden_layer_sizes=(4,1), random_state=1, activation='logistic')
+SVC_PARAMS = dict(penalty='l2', dual=False)
+GAUSSIAN_PARAMS = dict(kernel=1.0 * RBF(length_scale=1.0))
 
 # Importing data
 
@@ -35,16 +50,11 @@ for i, row in testData.iterrows():
 	a = float(sex.index(row['Sex']))
 	testData.set_value(i, 'Sex', a)
 
-# Split Data into training and Validation Sets, both split into x and y
-
-train, validation = train_test_split(trainData, test_size = 0.2) 
 
 num_test = testData.shape[0]
 output = [0 for i in range(num_test)]
 
 if VALIDATE:
-
-	NUM_TESTS = 50
 
 	sum_accuracy = 0.0
 
@@ -52,17 +62,29 @@ if VALIDATE:
 
 		train, validation = train_test_split(trainData, test_size = 0.1) 
 
-		train_x = train.iloc[:, [2,4,5,9]]
+		train_x = train.iloc[:, [2,4,5,9]]					# only keep Sex, Age, Fare and Pclass
 		validation_x = validation.iloc[:, [2,4,5,9]]
 		train_y = list(train.iloc[:, 1])
 		validation_y = list(validation.iloc[:, 1])
 
 		if ALG == "KNN":
-			clf = KNeighborsClassifier(n_neighbors=5)
+			clf = KNeighborsClassifier(**KNN_PARAMS)
 			clf.fit(train_x, train_y)
 
 		if ALG == "RandomForest":
-			clf = RandomForestClassifier(max_depth=2, random_state=0)
+			clf = RandomForestClassifier(**RANDOMFOREST_PARAMS)
+			clf.fit(train_x, train_y)
+
+		if ALG == "MLP":
+			clf = MLPClassifier(**MLP_PARAMS)
+			clf.fit(train_x, train_y)
+
+		if ALG == "SVC":
+			clf = svm.LinearSVC(**SVC_PARAMS)
+			clf.fit(train_x, train_y)
+
+		if ALG == "Gaussian":
+			clf = GaussianProcessClassifier(**GAUSSIAN_PARAMS)
 			clf.fit(train_x, train_y)
 
 		num_entries = len(validation_y)
@@ -76,22 +98,33 @@ if VALIDATE:
 
 		accuracy = (100 * correct / num_entries)
 		sum_accuracy += accuracy
-#			print("Test #", test_number, " Validation Accuracy: ", accuracy, "%")
 
-	print("Total accuracy over 10 tests: ", str(sum_accuracy/NUM_TESTS))
+	print("Total accuracy over ", str(NUM_TESTS), " tests: ", str(sum_accuracy/NUM_TESTS))
 
 if not VALIDATE:
 
-	train_x = trainData.iloc[:, [2,4,5,9]]
+	train_x = trainData.iloc[:, [2,4,5,9]]			# only keep Sex, Age, Fare and Pclass
 	train_y = list(trainData.iloc[:, 1])
 	test_x = testData.iloc[:, [1,3,4,8]]
 
 	if ALG == "KNN":
-		clf = KNeighborsClassifier(n_neighbors=9)
+		clf = KNeighborsClassifier(**KNN_PARAMS)
 		clf.fit(train_x, train_y)
 
 	if ALG == "RandomForest":
-		clf = RandomForestClassifier(max_depth=5, random_state=0)
+		clf = RandomForestClassifier(**RANDOMFOREST_PARAMS)
+		clf.fit(train_x, train_y)
+
+	if ALG == "MLP":
+		clf = MLPClassifier(**MLP_PARAMS)
+		clf.fit(train_x, train_y)
+
+	if ALG == "SVC":
+		clf = svm.LinearSVC(**SVC_PARAMS)
+		clf.fit(train_x, train_y)
+
+	if ALG == "Gaussian":
+		clf = GaussianProcessClassifier(**GAUSSIAN_PARAMS)
 		clf.fit(train_x, train_y)
 
 	for i, row in test_x.iterrows():
@@ -101,15 +134,3 @@ if not VALIDATE:
 
 	my_df = pd.DataFrame(output)
 	my_df.to_csv('Output.csv', index=False, header=["PassengerId", "Survived"])
-
-
-
-"""
-TO DO:
-
-Automate validation process to repeat 10x for higher validation accuracy.
-Include additional features. 
-Implement PCA?
-Try KNN?
-
-"""
